@@ -1,0 +1,13 @@
+{
+  "name": "human-interior-site",
+  "version": "1.0.0",
+  "description": "Landing page for Human Interior",
+  "main": "index.html",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css",
+    "watch:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}
