@@ -14,7 +14,7 @@
   --w10:rgba(255,255,255,.08);
   --gb:rgba(201,169,122,.18);
   --serif:'Playfair Display',Georgia,serif;
-  --sans:'Inter',system-ui,sans-serif;
+  --sans:'Montserrat',system-ui,sans-serif;
 }
 html{scroll-behavior:smooth;font-size:16px}
 body{background:var(--black);color:#fff;font-family:var(--sans);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -45,7 +45,7 @@ nav.scrolled{background:rgba(8,8,8,.95)}
 .hero-eyebrow span{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;animation:pulse 2s infinite}
 .hero-eyebrow p{font-size:.62rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero-h1{font-family:var(--serif);font-size:clamp(2.4rem,5vw,4rem);font-style:italic;line-height:1.12;margin-bottom:22px;color:#fff}
+.hero-h1{font-family:var(--serif);font-size:clamp(1.5rem,6.2vw,4rem);font-style:italic;line-height:1.12;margin-bottom:22px;color:#fff;white-space:nowrap}
 .hero-h1 em{color:var(--gold);font-style:italic;background:linear-gradient(90deg,var(--gold2),var(--gold3),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:1rem;color:var(--w60);font-weight:300;line-height:1.75;max-width:500px;margin-bottom:36px}
 .hero-btns{display:flex;gap:14px;flex-wrap:wrap}
@@ -220,7 +220,7 @@ footer{background:#080808;border-top:1px solid rgba(201,169,122,.15);padding:60p
 }
 @media(max-width:480px){
   .hero-grid{padding:90px 16px 48px}
-  .hero-h1{font-size:2rem}
+  .hero-h1{font-size:clamp(1.25rem,7.5vw,2rem)}
   .hero-btns{flex-direction:column}
   .btn-gold,.btn-outline{justify-content:center;width:100%}
   .section{padding:64px 16px}

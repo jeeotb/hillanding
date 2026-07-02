@@ -579,7 +579,7 @@ video {
   --w10:rgba(255,255,255,.08);
   --gb:rgba(201,169,122,.18);
   --serif:'Playfair Display',Georgia,serif;
-  --sans:'Inter',system-ui,sans-serif;
+  --sans:'Montserrat',system-ui,sans-serif;
 }
 
 html{
@@ -784,11 +784,12 @@ nav.scrolled{
 
 .hero-h1{
   font-family:var(--serif);
-  font-size:clamp(2.4rem,5vw,4rem);
+  font-size:clamp(1.5rem,6.2vw,4rem);
   font-style:italic;
   line-height:1.12;
   margin-bottom:22px;
-  color:#fff
+  color:#fff;
+  white-space:nowrap
 }
 
 .hero-h1 em{
@@ -1061,7 +1062,10 @@ nav.scrolled{
   border-radius:16px;
   overflow:hidden;
   transition:all .3s;
-  cursor:pointer
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  height:100%
 }
 
 .benefit-card:hover{
@@ -1076,6 +1080,7 @@ nav.scrolled{
 
 .benefit-img{
   height:220px;
+  flex-shrink:0;
   overflow:hidden;
   position:relative
 }
@@ -1115,7 +1120,15 @@ nav.scrolled{
 }
 
 .benefit-body{
-  padding:24px
+  padding:24px;
+  flex:1;
+  display:flex;
+  flex-direction:column
+}
+
+/* Đẩy ô giá (div cuối trong body) xuống đáy để 3 card thẳng hàng */
+.benefit-body > div:last-child{
+  margin-top:auto
 }
 
 .benefit-body h3{
@@ -1138,7 +1151,8 @@ nav.scrolled{
   border-top:1px solid rgba(255,255,255,.05);
   display:flex;
   align-items:center;
-  justify-content:space-between
+  justify-content:space-between;
+  margin-top:auto
 }
 
 .benefit-tag{
@@ -1367,8 +1381,27 @@ nav.scrolled{
 }
 
 .form-inner{
-  max-width:600px;
+  max-width:1080px;
   margin:0 auto
+}
+
+/* Countdown (trái) + Form (phải) cùng một hàng */
+.form-layout{
+  display:grid;
+  grid-template-columns:0.8fr 1fr;
+  gap:36px;
+  align-items:stretch
+}
+
+.form-layout .countdown-card{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  margin:0
+}
+
+.form-layout .form-card{
+  margin:0
 }
 
 .form-card{
@@ -1487,6 +1520,23 @@ footer{
 .footer-inner{
   max-width:1160px;
   margin:0 auto
+}
+
+/* Showroom + Hotline trong footer */
+.footer-location{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:48px;
+  align-items:center;
+  padding-bottom:52px;
+  margin-bottom:52px;
+  border-bottom:1px solid rgba(201,169,122,.15)
+}
+
+.footer-location .location-info{
+  display:flex;
+  flex-direction:column;
+  gap:20px
 }
 
 .footer-grid{
@@ -1837,6 +1887,18 @@ footer{
     grid-template-columns:1fr
   }
 
+  .form-layout{
+    grid-template-columns:1fr;
+    gap:28px
+  }
+
+  .footer-location{
+    grid-template-columns:1fr;
+    gap:32px;
+    padding-bottom:40px;
+    margin-bottom:40px
+  }
+
   .footer-grid{
     grid-template-columns:1fr
   }
@@ -1873,7 +1935,7 @@ footer{
   }
 
   .hero-h1{
-    font-size:2rem
+    font-size:clamp(1.25rem,7.5vw,2rem)
   }
 
   .hero-btns{
@@ -3466,4 +3528,255 @@ footer{
 .gallery-dot.active {
   background-color: var(--gold);
   transform: scale(1.2);
+}
+
+/* ══════════════════════════════════════════════════════
+   FUNNEL UPDATE — Partnership video (TOFU), policy price-bar
+   in gallery modal, form select fields, form trust badge
+   ══════════════════════════════════════════════════════ */
+
+/* ── PARTNERSHIP VIDEO (TOFU trust anchor) ── */
+.partnership-section{
+  padding:80px 40px;
+  background:var(--card);
+  border-top:1px solid rgba(201,169,122,.12);
+  border-bottom:1px solid rgba(201,169,122,.12);
+  text-align:center;
+}
+
+.partnership-inner{
+  max-width:1000px;
+  margin:0 auto;
+}
+
+.partnership-video-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  border-radius:16px;
+  overflow:hidden;
+  margin-top:40px;
+  border:1px solid rgba(201,169,122,.25);
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+  background:#000;
+}
+
+.partnership-video-wrap iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:none;
+}
+
+.video-facade{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  cursor:pointer;
+  border:none;
+  padding:0;
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.video-facade::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.65),rgba(0,0,0,.15));
+}
+
+.video-facade-play{
+  position:relative;
+  z-index:1;
+  width:76px;
+  height:76px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 10px 30px rgba(168,137,58,.5);
+  transition:transform .25s;
+}
+
+.video-facade:hover .video-facade-play{
+  transform:scale(1.08);
+}
+
+.video-facade-play svg{
+  margin-left:4px;
+}
+
+.partnership-caption{
+  position:absolute;
+  z-index:2;
+  left:16px;
+  bottom:16px;
+  font-size:.68rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#fff;
+  background:rgba(0,0,0,.55);
+  padding:6px 16px;
+  border-radius:99px;
+  display:inline-block;
+  pointer-events:none;
+}
+
+@media(max-width:900px){
+  .partnership-section{padding:64px 20px}
+  .video-facade-play{width:60px;height:60px}
+}
+
+/* ── PRICE BAR inside gallery modal (policy / pricing-segment entries) ── */
+.gallery-price-bar{
+  display:none;
+  width:100%;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  background:rgba(201,169,122,.08);
+  border:1px solid rgba(201,169,122,.3);
+  border-radius:12px;
+  padding:16px 20px;
+  flex-wrap:wrap;
+}
+
+.gallery-price-bar.show{
+  display:flex;
+}
+
+.gallery-price-bar .gp-type{
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:1.05rem;
+  color:#fff;
+}
+
+.gallery-price-bar .gp-price{
+  text-align:right;
+}
+
+.gallery-price-bar .gp-price-label{
+  display:block;
+  font-size:.6rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--w60);
+  margin-bottom:2px;
+}
+
+.gallery-price-bar .gp-price-value{
+  font-size:1.15rem;
+  font-weight:700;
+  color:var(--gold);
+}
+
+.gallery-modal-cta{
+  margin-top:4px;
+  width:100%;
+  justify-content:center;
+}
+
+/* ── FORM SELECT FIELDS + TRUST BADGE ── */
+.field select{
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  padding:13px 16px;
+  color:#fff;
+  font-family:var(--sans);
+  font-size:.88rem;
+  transition:all .25s;
+  outline:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%23C9A97A'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 16px center;
+}
+
+.field select:focus{
+  border-color:rgba(201,169,122,.5);
+  box-shadow:0 0 0 3px rgba(201,169,122,.08);
+}
+
+.field select.err{
+  border-color:rgba(201,169,122,.6);
+  background-color:rgba(201,169,122,.04);
+}
+
+.field select option{
+  background:#111;
+  color:#fff;
+}
+
+.form-trust-badge{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:16px;
+  font-size:.68rem;
+  color:var(--w60);
+  letter-spacing:.04em;
+  text-align:center;
+}
+
+/* ── PRICING MODULE CARD AFFORDANCE (matches VIP benefit-foot pattern) ── */
+.benefit-card .benefit-foot{
+  cursor:pointer;
+}
+
+
+/* ===== HERO COUNTDOWN (compact) ===== */
+.hero-countdown{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-top:30px;
+  flex-wrap:wrap
+}
+.hero-cd-label{
+  font-size:.62rem;
+  font-weight:600;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--gold)
+}
+.hero-cd-items{display:flex;gap:10px}
+.hero-cd-item{
+  min-width:56px;
+  padding:9px 6px;
+  text-align:center;
+  background:rgba(12,10,7,.6);
+  border:1px solid rgba(201,169,122,.25);
+  border-radius:10px;
+  -webkit-backdrop-filter:blur(10px);
+          backdrop-filter:blur(10px)
+}
+.hero-cd-item .num{
+  display:block;
+  font-size:1.15rem;
+  font-weight:700;
+  color:#fff;
+  font-variant-numeric:tabular-nums
+}
+.hero-cd-item .unit{
+  font-size:.55rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--w60)
+}
+@media(max-width:640px){
+  .hero-countdown{gap:12px;margin-top:24px}
+  .hero-cd-item{min-width:48px;padding:7px 5px}
+  .hero-cd-item .num{font-size:1rem}
 }
