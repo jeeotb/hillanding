@@ -137,7 +137,7 @@
 
   <div class="benefits-grid" style="margin-top:40px;">
     <!-- Module 1 Bedroom -->
-    <div class="benefit-card" onclick="openGalleryModal('policy-1pn')">
+    <div class="benefit-card" onclick="scrollToGallery('gallery-1pn')">
       <div class="benefit-img">
         <img src="./assets/images/THE TEN - 1PN - CONCEPT 1/A_View01.webp" alt="1 Phòng Ngủ" loading="lazy" decoding="async"/>
       </div>
@@ -156,7 +156,7 @@
     </div>
 
     <!-- Module 2 Bedrooms -->
-    <div class="benefit-card featured" onclick="openGalleryModal('policy-2pn')">
+    <div class="benefit-card featured" onclick="scrollToGallery('gallery-2pn')">
       <div class="benefit-img">
         <div class="benefit-badge">Phổ Biến Nhất</div>
         <img src="./assets/images/THE TEN - 2PN - CONCEPT 1/A_View03.webp" alt="2 Phòng Ngủ" loading="lazy" decoding="async"/>
@@ -176,7 +176,7 @@
     </div>
 
     <!-- Module 3 Bedrooms -->
-    <div class="benefit-card" onclick="openGalleryModal('policy-3pn')">
+    <div class="benefit-card" onclick="scrollToGallery('gallery-3pn')">
       <div class="benefit-img">
         <img src="./assets/images/THE TEN - 3PN/1.webp" alt="Căn hộ 3 Phòng Ngủ (128m²)" loading="lazy" decoding="async"/>
       </div>
@@ -203,7 +203,9 @@
   <div class="gold-line"></div>
   <p class="sec-sub">Thiết kế thi công thực tế đa dạng phong cách, được bảo chứng bởi các tập đoàn lớn toàn cầu.</p>
 
-        <div class="gallery-grid">
+  <!-- 1 PHÒNG NGỦ -->
+  <h3 class="gallery-subheading" id="gallery-1pn">1 Phòng Ngủ</h3>
+  <div class="gallery-row">
     <div class="gallery-item" onclick="openGalleryModal('the-ten-1pn-concept-1')" style="cursor: pointer;">
       <img src="./assets/images/THE TEN - 1PN - CONCEPT 1/A_View01.webp" alt="The Ten - 1PN - Concept 1" loading="lazy" decoding="async"/>
       <div class="gallery-cap">The Ten - 1PN - Concept 1</div>
@@ -216,6 +218,11 @@
       <img src="./assets/images/THE TEN - 1PN - CONCEPT 3/A_View02.webp" alt="The Ten - 1PN - Concept 3" loading="lazy" decoding="async"/>
       <div class="gallery-cap">The Ten - 1PN - Concept 3</div>
     </div>
+  </div>
+
+  <!-- 2 PHÒNG NGỦ -->
+  <h3 class="gallery-subheading" id="gallery-2pn">2 Phòng Ngủ</h3>
+  <div class="gallery-row">
     <div class="gallery-item" onclick="openGalleryModal('the-ten-2pn-concept-1')" style="cursor: pointer;">
       <img src="./assets/images/THE TEN - 2PN - CONCEPT 1/A_View03.webp" alt="The Ten - 2PN - Concept 1" loading="lazy" decoding="async"/>
       <div class="gallery-cap">The Ten - 2PN - Concept 1</div>
@@ -228,6 +235,11 @@
       <img src="./assets/images/THE TEN - 2PN - CONCEPT 3/A_View03.webp" alt="The Ten - 2PN - Concept 3" loading="lazy" decoding="async"/>
       <div class="gallery-cap">The Ten - 2PN - Concept 3</div>
     </div>
+  </div>
+
+  <!-- 3 PHÒNG NGỦ -->
+  <h3 class="gallery-subheading" id="gallery-3pn">3 Phòng Ngủ</h3>
+  <div class="gallery-row">
     <div class="gallery-item" onclick="openGalleryModal('the-ten-3pn')" style="cursor: pointer;">
       <img src="./assets/images/THE TEN - 3PN/1.webp" alt="The Ten - 3PN" loading="lazy" decoding="async"/>
       <div class="gallery-cap">The Ten - 3PN</div>
