@@ -311,10 +311,28 @@ function openGalleryModal(projectId) {
     thumbsContainer.appendChild(thumb);
   });
 
+  // Preload toàn bộ ảnh của album ngay khi mở modal → chuyển ảnh gần như tức thì
+  currentProject.images.forEach((imgObj) => {
+    const pre = new Image();
+    pre.decoding = 'async';
+    pre.src = imgObj.url;
+  });
+
   // Render first slide
   renderSlide(0);
 
   modal.classList.add('show');
+}
+
+// Cuộn từ thẻ "Phân Khúc Căn Hộ" xuống đúng sub-heading tương ứng
+// trong section "Dự Án Nội Thất Tiêu Biểu" (trừ hao chiều cao navbar cố định).
+function scrollToGallery(targetId) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  const nav = document.getElementById('navbar');
+  const offset = (nav ? nav.offsetHeight : 70) + 20;
+  const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+  window.scrollTo({ top, behavior: 'smooth' });
 }
 
 function closeGalleryModal() {
@@ -372,6 +390,7 @@ function renderSlide(idx) {
   
   // Update UI
   const slideData = currentProject.images[currentSlideIdx];
+  mainImg.decoding = 'async';
   mainImg.src = slideData.url;
   counter.textContent = `${currentSlideIdx + 1} / ${currentProject.images.length}`;
   title.textContent = slideData.title;
