@@ -1173,6 +1173,37 @@ nav.scrolled{
   margin-top:52px
 }
 
+/* Nhóm dự án theo phân khúc phòng ngủ */
+.gallery-subheading{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  font-family:var(--serif);
+  font-size:1.5rem;
+  font-style:italic;
+  color:var(--gold);
+  margin:52px 0 4px
+}
+
+.gallery-subheading::before{
+  content:'';
+  width:32px;
+  height:2px;
+  background:var(--gold);
+  flex-shrink:0
+}
+
+.gallery-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:24px
+}
+
+.gallery-row .gallery-item{
+  height:280px
+}
+
 .gallery-item{
   border-radius:12px;
   overflow:hidden;
@@ -1883,6 +1914,19 @@ footer{
     grid-row:auto
   }
 
+  .gallery-row{
+    grid-template-columns:1fr 1fr
+  }
+
+  .gallery-row .gallery-item{
+    height:200px
+  }
+
+  .gallery-subheading{
+    font-size:1.25rem;
+    margin-top:40px
+  }
+
   .location-grid{
     grid-template-columns:1fr
   }
@@ -2387,8 +2431,7 @@ footer{
 }
 
 .gallery-modal-header {
-  text-align: center;
-  margin-bottom: 5px;
+  display: none;
 }
 
 .gallery-modal-header h2 {
@@ -2996,18 +3039,21 @@ footer{
 
 .gallery-main-view {
   width: 100%;
-  max-height: 65vh;
+  height: 68vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #0a0a0a;
 }
 
 .gallery-main-view img {
-  max-width: 100%;
-  max-height: 65vh;
-  -o-object-fit: contain;
-     object-fit: contain;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 }
 
@@ -3467,11 +3513,12 @@ footer{
 
 .gallery-modal-content {
   position: relative;
-  width: 90%;
-  max-width: 1000px;
-  height: 80vh;
+  width: 92%;
+  max-width: 1200px;
+  max-height: 94vh;
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .gallery-carousel {
@@ -3779,4 +3826,9 @@ footer{
   .hero-countdown{gap:12px;margin-top:24px}
   .hero-cd-item{min-width:48px;padding:7px 5px}
   .hero-cd-item .num{font-size:1rem}
+}
+
+/* Gallery modal — preview fill (override cho mobile, đặt cuối để thắng cascade) */
+@media(max-width:768px){
+  .gallery-main-view{height:46vh}
 }
