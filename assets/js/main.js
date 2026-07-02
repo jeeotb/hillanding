@@ -1,20 +1,26 @@
+// ==== CẤU HÌNH GỬI LEAD VỀ GOOGLE SHEET =========================
+// Dán URL Web App sau khi deploy Apps Script (xem google-sheet/HUONG-DAN.md)
+const LEAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxShFL2_wKOV2pXRT60X9ugNH2459bjzCI6yGnhTCoJlYK_pm960NypAQPHWXUScutSFA/exec';
+// ================================================================
+
 // Countdown
 (function(){
   const target = new Date('2026-07-05T09:00:00+07:00').getTime();
   function tick(){
-    const now = Date.now(), diff = target - now;
-    if(diff <= 0){
-      ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent='00');
-      return;
-    }
-    const d = Math.floor(diff/86400000);
-    const h = Math.floor((diff%86400000)/3600000);
-    const m = Math.floor((diff%3600000)/60000);
-    const s = Math.floor((diff%60000)/1000);
-    document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
-    document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
-    document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
-    document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+    // Guard: countdown markup may not exist on every page/section — bail out safely
+    // instead of throwing (a past bug here broke every script below it: counters,
+    // mobile nav, form submit, gallery modal).
+    // Bind theo [data-cd] để hỗ trợ nhiều countdown (hero + form) cùng lúc
+    const els = document.querySelectorAll('[data-cd]');
+    if(!els.length) return;
+    const now = Date.now(), diff = Math.max(0, target - now);
+    const v = {
+      d: Math.floor(diff/86400000),
+      h: Math.floor((diff%86400000)/3600000),
+      m: Math.floor((diff%3600000)/60000),
+      s: Math.floor((diff%60000)/1000)
+    };
+    els.forEach(el => { el.textContent = String(v[el.dataset.cd] ?? 0).padStart(2,'0'); });
   }
   tick(); setInterval(tick,1000);
 })();
@@ -67,19 +73,60 @@ document.getElementById('reg-form').addEventListener('submit',function(e){
     else{input.classList.remove('err');msg.classList.remove('show');}
   }
 
+  const segment=document.getElementById('f-segment');
+  const status=document.getElementById('f-status');
+
   setErr(name,'err-name',name.value.trim().length<2);
   setErr(phone,'err-phone',!/^(0[35789])\d{8}$/.test(phone.value.replace(/\s/g,'')));
   if(email.value.trim()){
     setErr(email,'err-email',!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value));
   } else { email.classList.remove('err'); document.getElementById('err-email').classList.remove('show'); }
+  if(segment) setErr(segment,'err-segment',segment.value==='');
+  if(status) setErr(status,'err-status',status.value==='');
 
   if(!ok) return;
 
   const code='HI-'+Math.floor(10000+Math.random()*90000);
-  document.getElementById('t-name').textContent=name.value.trim();
-  document.getElementById('t-code').textContent='#'+code;
-  document.getElementById('modal').classList.add('open');
-  this.reset();
+
+  // Gửi lead về Google Sheet qua Apps Script
+  const btn=this.querySelector('.form-submit');
+  const btnText=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='Đang gửi đăng ký...';
+
+  const qs=new URLSearchParams(location.search);
+  const payload=new URLSearchParams({
+    code:code,
+    name:name.value.trim(),
+    phone:phone.value.replace(/\s/g,''),
+    email:email.value.trim(),
+    segment:segment?segment.options[segment.selectedIndex].text:'',
+    status:status?status.options[status.selectedIndex].text:'',
+    utm_source:qs.get('utm_source')||'',
+    utm_medium:qs.get('utm_medium')||'',
+    utm_campaign:qs.get('utm_campaign')||'',
+    utm_content:qs.get('utm_content')||'',
+    page:location.href
+  });
+
+  const showTicket=()=>{
+    btn.disabled=false;btn.innerHTML=btnText;
+    document.getElementById('t-name').textContent=name.value.trim();
+    document.getElementById('t-code').textContent='#'+code;
+    document.getElementById('modal').classList.add('open');
+    this.reset();
+  };
+
+  if(!LEAD_ENDPOINT){
+    console.warn('[HI] LEAD_ENDPOINT chưa cấu hình — lead KHÔNG được lưu vào Sheet!');
+    showTicket();
+    return;
+  }
+  fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',body:payload})
+    .then(showTicket)
+    .catch(()=>{
+      btn.disabled=false;btn.innerHTML=btnText;
+      alert('Không gửi được đăng ký. Vui lòng thử lại hoặc gọi hotline 0869.83.05.51');
+    });
 });
 
 document.getElementById('modalClose').addEventListener('click',()=>{
@@ -91,130 +138,129 @@ document.getElementById('modal').addEventListener('click',function(e){
 
 // Gallery Carousel Logic
 const galleryData = {
-  'showroom': {
-    title: 'Showroom',
+  'the-ten-1pn-concept-1': {
+    title: 'The Ten - 1PN - Concept 1',
     subtitle: 'Khám phá không gian thiết kế độc bản',
     images: [
-      { url: './assets/images/showroom/img1.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/showroom/img2.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/showroom/img3.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/showroom/img4.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/showroom/img5.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/showroom/img6.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/showroom/img7.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/showroom/img8.jpg', title: 'Showroom', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View01.webp', title: 'The Ten - 1PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View03.webp', title: 'The Ten - 1PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View05.webp', title: 'The Ten - 1PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View10.webp', title: 'The Ten - 1PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View17.webp', title: 'The Ten - 1PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  '1_ngu_concept_01_22_05_2026': {
-    title: 'Thiết kế 3D 1 Ngủ - THE TEN',
+  'the-ten-1pn-concept-2': {
+    title: 'The Ten - 1PN - Concept 2',
     subtitle: 'Khám phá không gian thiết kế độc bản',
     images: [
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img1.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img2.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img3.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img4.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img5.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img6.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img7.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_01_22_05_2026/img8.jpg', title: 'Thiết kế 3D 1 Ngủ - THE TEN', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 2/A_View01.webp', title: 'The Ten - 1PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 2/A_View03.webp', title: 'The Ten - 1PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 2/A_View04.webp', title: 'The Ten - 1PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 2/A_View11.webp', title: 'The Ten - 1PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 2/A_View15.webp', title: 'The Ten - 1PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  '1_ngu_concept_02_22_05_2026': {
-    title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN',
+  'the-ten-1pn-concept-3': {
+    title: 'The Ten - 1PN - Concept 3',
     subtitle: 'Khám phá không gian thiết kế độc bản',
     images: [
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img1.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img2.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img3.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img4.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img5.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img6.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img7.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/1_ngu_concept_02_22_05_2026/img8.jpg', title: 'Thiết kế 3D 1 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 3/A_View02.webp', title: 'The Ten - 1PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 3/A_View03.webp', title: 'The Ten - 1PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 3/A_View04.webp', title: 'The Ten - 1PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 3/A_View07.webp', title: 'The Ten - 1PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 3/A_View15.webp', title: 'The Ten - 1PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  '2_ngu_concept_01_22_05_2026': {
-    title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN',
+  'the-ten-2pn-concept-1': {
+    title: 'The Ten - 2PN - Concept 1',
     subtitle: 'Khám phá không gian thiết kế độc bản',
     images: [
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img1.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img2.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img3.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img4.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img5.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img6.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img7.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/2_ngu_concept_01_22_05_2026/img8.jpg', title: 'Thiết kế 3D 2 Ngủ - Chị Trúc THE TEN', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View03.webp', title: 'The Ten - 2PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View06.webp', title: 'The Ten - 2PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View09.webp', title: 'The Ten - 2PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View14.webp', title: 'The Ten - 2PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View22.webp', title: 'The Ten - 2PN - Concept 1', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  'chi_nuong_hakura': {
-    title: 'Thiết kế 3D Chị Nương | Hakura',
+  'the-ten-2pn-concept-2': {
+    title: 'The Ten - 2PN - Concept 2',
     subtitle: 'Khám phá không gian thiết kế độc bản',
     images: [
-      { url: './assets/images/chi_nuong_hakura/img1.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_nuong_hakura/img2.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_nuong_hakura/img3.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_nuong_hakura/img4.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_nuong_hakura/img5.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_nuong_hakura/img6.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_nuong_hakura/img7.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_nuong_hakura/img8.jpg', title: 'Thiết kế 3D Chị Nương | Hakura', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 2/A_View01.webp', title: 'The Ten - 2PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 2/A_View02.webp', title: 'The Ten - 2PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 2/A_View07.webp', title: 'The Ten - 2PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 2/A_View16.webp', title: 'The Ten - 2PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 2/A_View21.webp', title: 'The Ten - 2PN - Concept 2', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  'chi_dieu_the_nest': {
-    title: 'Thiết kế 3D - Chị Diệu The Nest',
+  'the-ten-2pn-concept-3': {
+    title: 'The Ten - 2PN - Concept 3',
     subtitle: 'Khám phá không gian thiết kế độc bản',
     images: [
-      { url: './assets/images/chi_dieu_the_nest/img1.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_dieu_the_nest/img2.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_dieu_the_nest/img3.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_dieu_the_nest/img4.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_dieu_the_nest/img5.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_dieu_the_nest/img6.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_dieu_the_nest/img7.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/chi_dieu_the_nest/img8.jpg', title: 'Thiết kế 3D - Chị Diệu The Nest', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 3/A_View03.webp', title: 'The Ten - 2PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 3/A_View04.webp', title: 'The Ten - 2PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 3/A_View05.webp', title: 'The Ten - 2PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 3/A_View17.webp', title: 'The Ten - 2PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 3/A_View24.webp', title: 'The Ten - 2PN - Concept 3', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  'can_ho_orchard_hill_sycamore': {
-    title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore',
+  'the-ten-3pn': {
+    title: 'The Ten - 3PN',
     subtitle: 'Khám phá không gian thiết kế độc bản',
     images: [
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img1.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img2.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img3.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img4.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img5.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img6.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img7.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/can_ho_orchard_hill_sycamore/img8.jpg', title: 'Thiết kế 3D căn hộ ORCHARD HILL sycamore', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 3PN/1.webp', title: 'The Ten - 3PN', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/4.webp', title: 'The Ten - 3PN', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/9.webp', title: 'The Ten - 3PN', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/10.webp', title: 'The Ten - 3PN', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/15.webp', title: 'The Ten - 3PN', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/16.webp', title: 'The Ten - 3PN', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  'the_glory': {
-    title: 'Thiết kế 3D căn hộ Glory',
-    subtitle: 'Khám phá không gian thiết kế độc bản',
+
+  // ── CHÍNH SÁCH CHO THUÊ LẠI THEO PHÂN KHÚC ──
+  'policy-1pn': {
+    type: 'policy',
+    segment: '1pn',
+    title: 'Căn Hộ 1 Phòng Ngủ',
+    subtitle: 'Chính sách cho thuê lại từ Chủ Đầu Tư Becamex Tokyu',
+    aptType: 'Căn hộ 1 Phòng Ngủ',
+    price: '25.000.000đ/tháng',
     images: [
-      { url: './assets/images/the_glory/img1.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/the_glory/img2.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/the_glory/img3.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/the_glory/img4.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/the_glory/img5.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/the_glory/img6.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/the_glory/img7.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/the_glory/img8.jpg', title: 'Thiết kế 3D căn hộ Glory', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View01.webp', title: 'Căn Hộ 1 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View03.webp', title: 'Căn Hộ 1 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View05.webp', title: 'Căn Hộ 1 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View10.webp', title: 'Căn Hộ 1 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 1PN - CONCEPT 1/A_View17.webp', title: 'Căn Hộ 1 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
-  'orchard_grand': {
-    title: 'ORCHARD GRAND',
-    subtitle: 'Khám phá không gian thiết kế độc bản',
+  'policy-2pn': {
+    type: 'policy',
+    segment: '2pn',
+    title: 'Căn Hộ 2 Phòng Ngủ',
+    subtitle: 'Chính sách cho thuê lại từ Chủ Đầu Tư Becamex Tokyu',
+    aptType: 'Căn hộ 2 Phòng Ngủ',
+    price: '32.500.000đ/tháng',
     images: [
-      { url: './assets/images/orchard_grand/img1.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/orchard_grand/img2.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/orchard_grand/img3.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/orchard_grand/img4.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/orchard_grand/img5.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/orchard_grand/img6.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/orchard_grand/img7.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' },
-      { url: './assets/images/orchard_grand/img8.jpg', title: 'ORCHARD GRAND', desc: 'Hình ảnh thực tế dự án' }
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View03.webp', title: 'Căn Hộ 2 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View06.webp', title: 'Căn Hộ 2 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View09.webp', title: 'Căn Hộ 2 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View14.webp', title: 'Căn Hộ 2 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 2PN - CONCEPT 1/A_View22.webp', title: 'Căn Hộ 2 Phòng Ngủ', desc: 'Thiết kế 3D thực tế thi công' }
+    ]
+  },
+  'policy-3pn': {
+    type: 'policy',
+    segment: '3pn',
+    title: 'Căn Hộ 3 Phòng Ngủ (128m²)',
+    subtitle: 'Chính sách cho thuê lại từ Chủ Đầu Tư Becamex Tokyu',
+    aptType: 'Căn hộ 3 Phòng Ngủ (128m²)',
+    price: '38.000.000đ/tháng',
+    images: [
+      { url: './assets/images/THE TEN - 3PN/1.webp', title: 'Căn Hộ 3 Phòng Ngủ (128m²)', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/4.webp', title: 'Căn Hộ 3 Phòng Ngủ (128m²)', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/9.webp', title: 'Căn Hộ 3 Phòng Ngủ (128m²)', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/10.webp', title: 'Căn Hộ 3 Phòng Ngủ (128m²)', desc: 'Thiết kế 3D thực tế thi công' },
+      { url: './assets/images/THE TEN - 3PN/15.webp', title: 'Căn Hộ 3 Phòng Ngủ (128m²)', desc: 'Thiết kế 3D thực tế thi công' }
     ]
   },
 };
@@ -224,18 +270,38 @@ let currentProject = null;
 function openGalleryModal(projectId) {
   const modal = document.getElementById('galleryModal');
   const thumbsContainer = document.getElementById('galleryThumbnails');
-  
+  const priceBar = document.getElementById('galleryPriceBar');
+  const ctaBtn = document.getElementById('galleryModalCta');
+
   if(!galleryData[projectId]) return;
   currentProject = galleryData[projectId];
   currentSlideIdx = 0;
-  
+
   // Set Header
   document.getElementById('galleryModalTitle').textContent = currentProject.title;
   document.getElementById('galleryModalSubtitle').textContent = currentProject.subtitle;
-  
+
+  // Price bar — only shown for pricing-segment (policy) entries
+  if(priceBar){
+    if(currentProject.type === 'policy'){
+      document.getElementById('gpType').textContent = currentProject.aptType;
+      document.getElementById('gpPrice').textContent = currentProject.price;
+      priceBar.classList.add('show');
+    } else {
+      priceBar.classList.remove('show');
+    }
+  }
+
+  // CTA copy depends on entry type — always stays on-page (scrolls to form, never navigates away)
+  if(ctaBtn){
+    ctaBtn.textContent = currentProject.type === 'policy'
+      ? 'Đăng Ký Tư Vấn Phân Khúc Này →'
+      : 'Thích Phong Cách Này? Đăng Ký Tư Vấn →';
+  }
+
   // Clear old thumbnails
   thumbsContainer.innerHTML = '';
-  
+
   // Create Thumbnails
   currentProject.images.forEach((imgObj, i) => {
     const thumb = document.createElement('img');
@@ -244,10 +310,10 @@ function openGalleryModal(projectId) {
     thumb.onclick = () => renderSlide(i);
     thumbsContainer.appendChild(thumb);
   });
-  
+
   // Render first slide
   renderSlide(0);
-  
+
   modal.classList.add('show');
 }
 
@@ -255,6 +321,37 @@ function closeGalleryModal() {
   const modal = document.getElementById('galleryModal');
   modal.classList.remove('show');
 }
+
+// Modal CTA → always stays in-page: closes modal and scrolls to the form,
+// pre-selecting the "phân khúc quan tâm" field if opened from a policy card.
+function goToConsultFromModal(){
+  const segment = (currentProject && currentProject.segment) ? currentProject.segment : '';
+  closeGalleryModal();
+  const segmentSelect = document.getElementById('f-segment');
+  if(segment && segmentSelect){
+    segmentSelect.value = segment;
+  }
+  const formSection = document.getElementById('form-section');
+  if(formSection) formSection.scrollIntoView({behavior:'smooth'});
+}
+
+// Partnership video facade — loads the iframe only on click (faster initial page load)
+// Works with any embeddable video URL (Google Drive preview, YouTube embed, Vimeo, etc.)
+// via data-embed-src on the button.
+document.querySelectorAll('.video-facade').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    const wrap = btn.closest('.partnership-video-wrap');
+    const embedSrc = btn.dataset.embedSrc;
+    if(!wrap || !embedSrc) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = embedSrc;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('loading','lazy');
+    wrap.innerHTML = '';
+    wrap.appendChild(iframe);
+  });
+});
 
 function renderSlide(idx) {
   const mainImg = document.getElementById('galleryMainImage');
