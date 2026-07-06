@@ -3,6 +3,19 @@
 const LEAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxShFL2_wKOV2pXRT60X9ugNH2459bjzCI6yGnhTCoJlYK_pm960NypAQPHWXUScutSFA/exec';
 // ================================================================
 
+// ==== TRACKING SU KIEN (Google tag AW-18239610105) ==============
+function track(name, params){
+  if (typeof gtag === 'function') gtag('event', name, params || {});
+}
+document.addEventListener('click', function(e){
+  var a = e.target.closest ? e.target.closest('a') : null;
+  if (!a) return;
+  if ((a.getAttribute('href') || '').indexOf('tel:') === 0) track('phone_call', {link_text: 'sticky/footer'});
+  else if (a.classList.contains('qz-cta')) track('contact_zalo');
+  else if (a.classList.contains('qm-cta')) track('contact_messenger');
+});
+// ================================================================
+
 // Countdown
 (function(){
   const target = new Date('2026-07-05T09:00:00+07:00').getTime();
@@ -109,6 +122,7 @@ document.getElementById('reg-form').addEventListener('submit',function(e){
   });
 
   const showTicket=()=>{
+    track('generate_lead', {method: 'form_dang_ky', segment: segment ? segment.value : ''});
     btn.disabled=false;btn.innerHTML=btnText;
     document.getElementById('t-name').textContent=name.value.trim();
     document.getElementById('t-code').textContent='#'+code;
